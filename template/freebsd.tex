@@ -17,7 +17,11 @@
 \documentclass{beamer}
 
 \usepackage{url}
-\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1,T2A]{fontenc}
+%\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage[english,russian]{babel}
 \usepackage{verbatim}
 \usepackage{graphicx}
 \usepackage{listings}
@@ -29,7 +33,7 @@
 {
   \definecolor{beamer@gker}{rgb}{0.8,0.0,0.0}
   \setbeamercolor*{structure}{fg=beamer@gker}
-  \logo{\includegraphics[scale=0.5]{logo.pdf}}
+  \logo{\includegraphics[scale=0.5]{../template/logo.pdf}}
 }
 
 \setbeamertemplate{footline}[text line]{%
@@ -92,4 +96,3 @@
 }
 
 %%\lstset{escapechar=@,style=custommake}
-
