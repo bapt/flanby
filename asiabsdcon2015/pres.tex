@@ -13,8 +13,16 @@
 	\titlepage
 \end{frame}
 
+{
+\usebackgroundtemplate{
+\begin{picture}(0,0)
+\put(180,-180){
+\includegraphics[width=2.5in]{starre10.png}
+}
+\end{picture}
+}%
 \begin{frame}
-	\frametitle{Once upon a time... the binary packages\\\begin{CJK}{UTF8}{min}むかしむかし...バイナリパッケージ\end{CJK}}
+	\frametitle{Once upon a time... the binary packages\\\begin{CJK}{UTF8}{min}昔々...バイナリパッケージ\end{CJK}}
 	From the package point of view
 	\begin{itemize}
 		\item No binary upgrade
@@ -26,13 +34,22 @@
 		\item DO NOT EVER TOUCH AGAIN WHEN YOU MANAGE TO INSTALL
 	\end{itemize}
 \end{frame}
+}
 
+{
+\usebackgroundtemplate{
+\begin{picture}(0,0)
+\put(220,-220){
+\includegraphics[width=2in]{gavan-vilain2.png}
+}
+\end{picture}
+}%
 \begin{frame}
-	\frametitle{Once upon a time... the ports tree\\\begin{CJK}{UTF8}{min}むかし... portsツリーいったん\end{CJK}}
+	\frametitle{Once upon a time... the ports tree\\\begin{CJK}{UTF8}{min}昔々... portsツリー\end{CJK}}
 	What about the ports tree:
 	\begin{itemize}
 		\item fragile (no destdir/stagedir)
-		\item work to some extent (thanks portmaster/portupgrade)
+		\item work to some extent \\ (thanks portmaster/portupgrade)
 		\item inconsistent and creative:
 			\begin{itemize}
 				\item script could be found in any language
@@ -43,26 +60,82 @@
 		\item Overlink all over the place (hi libtool)
 	\end{itemize}
 \end{frame}
+}
 
+{
+\usebackgroundtemplate{
+\begin{picture}(0,0)
+\put(200,-220){
+\includegraphics[width=2in]{gavan.png}
+}
+\end{picture}
+}%
 \begin{frame}
 	\frametitle{History\\\begin{CJK}{UTF8}{min}歴史\end{CJK}}
+	\framesubtitle{FreeBSD}
 	\begin{itemize}
-		\item September 2010: First commit
-		\item March 2011:  [ECFT] pkgng 0.1-alpha1
-		\item January 2012: 1.0 beta1: pkg enters in the ports tree
+		\item Sept. 2010: First commit
+		\item March 2011: pkgng 0.1-alpha1
+		\item January 2012: 1.0 beta1:\\ pkg enters in the ports tree
 		\item August 2012: 1.0
-		\item October 2012: FreeBSD current switch to pkg
-		\item April 2013: Dragonfly 3.4 is released with pkg
-		\item November 2013: Dragonlfy 3.6 is released only supporting pkg
+		\item October 2012: default on -CURRENT
 		\item June 2013: 1.1
 		\item November 2013: 1.2
-		\item January 2014: FreeBSD 10.0 only support pkg
+		\item January 2014: 10.0 on pkg
 		\item July 2014: 1.3
 		\item September 2014: pkg\_install EOL
 		\item December 2014: 1.4
 	\end{itemize}
 \end{frame}
+}
 
+{
+\usebackgroundtemplate{
+\begin{picture}(0,0)
+\put(190,-220){
+\includegraphics[width=2.5in]{sharivan2.png}
+}
+\end{picture}
+}%
+\begin{frame}
+	\frametitle{History\\\begin{CJK}{UTF8}{min}歴史\end{CJK}}
+	\framesubtitle{DragonflyBSD}
+	\begin{itemize}
+		\item December 2012: Dports creation
+		\item January 2013: Announcement
+		\item April 2013: 3.4 \\ Support both pkg and pkgsrc
+		\item November 2013: 3.6 \\ pkg only
+	\end{itemize}
+\end{frame}
+}
+
+{
+\usebackgroundtemplate{
+\begin{picture}(0,0)
+\put(200,-220){
+\includegraphics[width=2.5in]{shaider2.png}
+}
+\end{picture}
+}%
+\begin{frame}
+	\frametitle{History\\\begin{CJK}{UTF8}{min}歴史\end{CJK}}
+	\framesubtitle{Others}
+	\begin{itemize}
+		\item 2014: Initial support for OS X
+		\item 2014: Initial support for Linux
+		\item 2015: Initial support for NetBSD/EdgeBSD
+	\end{itemize}
+\end{frame}
+}
+
+{
+\usebackgroundtemplate{
+\begin{picture}(0,0)
+\put(200,-220){
+\includegraphics[width=2in]{satana11.png}
+}
+\end{picture}
+}%
 \begin{frame}
 	\frametitle{Mistakes\\\begin{CJK}{UTF8}{min}間違い\end{CJK}}
 	\begin{itemize}
@@ -73,7 +146,16 @@
 		\item Lack of "project" communication
 	\end{itemize}
 \end{frame}
+}
 
+{
+\usebackgroundtemplate{
+\begin{picture}(0,0)
+\put(200,-220){
+\includegraphics[width=2in]{doll1.png}
+}
+\end{picture}
+}%
 \begin{frame}
 	\frametitle{Improvements\\\begin{CJK}{UTF8}{min}改善\end{CJK}}
 	\begin{itemize}
@@ -85,7 +167,16 @@
 		\item Give more clear directions, ROADMAP
 	\end{itemize}
 \end{frame}
+}
 
+{
+\usebackgroundtemplate{
+\begin{picture}(0,0)
+\put(200,-230){
+\includegraphics[width=2in]{xor-ro10.png}
+}
+\end{picture}
+}%
 \begin{frame}
 	\frametitle{Roadmap\\\begin{CJK}{UTF8}{min}ロードマップ\end{CJK}}
 	\begin{itemize}
@@ -105,9 +196,18 @@
 			\end{itemize}
 	\end{itemize}
 \end{frame}
+}
 
+{
+\usebackgroundtemplate{
+\begin{picture}(0,0)
+\put(200,-240){
+\includegraphics[width=1.8in]{gavan_sharivan.png}
+}
+\end{picture}
+}%
 \begin{frame}
-	\frametitle{Packaging base\\\begin{CJK}{UTF8}{min}包装ベース\end{CJK}}
+	\frametitle{Packaging base\\\begin{CJK}{UTF8}{min}-> パッケージ・ベース\end{CJK}}
 	\begin{itemize}
 		\item 4 meta packages (kernel, base, developement, debug)
 		\item Fine grain small packages
@@ -117,13 +217,14 @@
 		\item Packages for HEAD
 	\end{itemize}
 \end{frame}
+}
 
 \begin{frame}[plain]
-	\frametitle{Questions?\\\begin{CJK}{UTF8}{min}質問がありますか？\end{CJK}}
+	\frametitle{Questions?\\\begin{CJK}{UTF8}{min}ご質問\end{CJK}}
 	\begin{center}
 		\Huge Thanks
 		\\
-		\Huge \begin{CJK}{UTF8}{min}感謝\end{CJK}
+		\Huge \begin{CJK}{UTF8}{min}お礼\end{CJK}
 	\end{center}
 \end{frame}
 
