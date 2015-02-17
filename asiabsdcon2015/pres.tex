@@ -1,0 +1,129 @@
+\input{../template/freebsd.tex}
+\newcommand{\prestitle}{RuBSD 14}
+
+\title{FreeBSD: 4 years of pkg}
+\subtitle{A end less journey}
+\author{Baptiste Daroussin \\ \url{bapt@FreeBSD.org}}
+\institute{\includegraphics[scale=0.5]{../template/logo.pdf}}
+\date{Moscow \\ December 13st, 2014}
+
+\begin{document}
+\begin{frame}[plain]
+	\titlepage
+\end{frame}
+
+\begin{frame}
+	\frametitle{Once upon a time... the binary packages \\ Жили были... бинарные пакеты}
+	From the package point of view
+	\begin{itemize}
+		\item No binary upgrade
+		\item Inconsistencies
+		\item Lots of failing scripts
+		\item No signing support
+		\item No predictable updates
+		\item Sacrifice of chicken mandatory
+		\item DO NOT EVER TOUCH AGAIN WHEN YOU MANAGE TO INSTALL
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Once upon a time... the ports tree \\ Жило было... дерево портов}
+	What about the ports tree:
+	\begin{itemize}
+		\item fragile (no destdir/stagedir)
+		\item work to some extent (thanks portmaster/portupgrade)
+		\item inconsistent and creative:
+			\begin{itemize}
+				\item script could be found in any language
+				\item 20 ways to badly do one thing
+				\item 8 sides wheels keeps being reinveted
+			\end{itemize}
+		\item Better than web archive
+		\item Overlink all over the place (hi libtool)
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{History \\ История}
+	\begin{itemize}
+		\item September 2010: First commit
+		\item March 2011:  [ECFT] pkgng 0.1-alpha1
+		\item January 2012: 1.0 beta1: pkg enters in the ports tree
+		\item August 2012: 1.0
+		\item October 2012: FreeBSD current switch to pkg
+		\item April 2013: Dragonfly 3.4 is released with pkg
+		\item November 2013: Dragonlfy 3.6 is released only supporting pkg
+		\item June 2013: 1.1
+		\item November 2013: 1.2
+		\item January 2014: FreeBSD 10.0 only support pkg
+		\item July 2014: 1.3
+		\item September 2014: pkg\_install EOL
+		\item December 2014: 1.4
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Mistakes \\ Ошибки}
+	\begin{itemize}
+		\item Started as a pet project
+		\item Not enough strong directions
+		\item Regression/Unit tests added very late
+		\item Too much compromise accepted
+		\item Lack of "project" communication
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Improvements \\ Улучшения}
+	\begin{itemize}
+		\item Cleaning up/removing all the compatibility stuff
+		\item More test driven developement
+		\item Reduce the scope of what pkg(8) should do
+		\item Focus on stabilising what we have
+		\item Attract new developers
+		\item Give more clear directions, ROADMAP
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Roadmap \\ Планы}
+	\begin{itemize}
+		\item Provides/Requires
+		\item Flexible dependencies
+		\item sub packages (ports related)
+		\item flavours/alternatives (ports related)
+		\item List of supported ABI
+		\item Maybe extensibility: plugins? lua? duktape?
+		\item Transactions
+		\item More regression tests
+		\item 3rd party repositories:
+			\begin{itemize}
+				\item ports tree
+				\item yum (aka linux packages)
+				\item CPAN
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Packaging base \\ Опакечивание базовой системы}
+	\begin{itemize}
+		\item 4 meta packages (kernel, base, developement, debug)
+		\item Fine grain small packages
+		\item 3 way merge to handle /etc files
+		\item Packages for RELEASES and security fixes
+		\item Packages for STABLE branches
+		\item Packages for HEAD
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+	\frametitle{Questions? \\ Вопросы?}
+	\begin{center}
+		\Huge Thanks
+		\\
+		\Huge Спасибо
+	\end{center}
+\end{frame}
+
+\end{document}
