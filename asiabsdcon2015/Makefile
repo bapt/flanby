@@ -4,7 +4,7 @@ pres.pdf: pres.tex
 all: pres.pdf
 
 show: pres.pdf
-	xpdf pres.pdf
+	xpdf pres.pdf ${PAGE}
 
 clean:
 	rm -f *.blg *.bbl *.log *.aux *.nav *.out *.toc *.snm *.synctex.gz

@@ -239,6 +239,33 @@
 \end{frame}
 }
 
+\begin{frame}
+	\frametitle{New in pkg 1.5\\\begin{CJK}{UTF8}{min}pkg 1.5 変更履歴\end{CJK}}
+	\begin{itemize}
+		\item Improved support for NetBSD/EdgeBSD
+		\item Initial support for OSX
+		\item Extended credential support in plist (support for flags)
+		\item 40+ new regression tests
+		\item Lots of bugfixes
+		\item Custom keywords can have arguments in plist
+		\item Initial support for provides/requires
+		\item public API now C++ friendly
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Packaging base\\\begin{CJK}{UTF8}{min}-> パッケージ・ベース\end{CJK}}
+	\framesubtitle{Users expectations}
+	\begin{itemize}
+		\item Keep base as a one true entity
+		\item Fine grain package to reduce security updates
+		\item All options in separate packages
+		\item Development tools in separate packages
+		\item Ability on only install runtime things (no .a, no .h etc)
+		\item Ability for developers to provide a custom repository to allow users to test their changes. Example: a new libc++
+	\end{itemize}
+\end{frame}
+
 {
 \usebackgroundtemplate{
 \begin{picture}(0,0)
