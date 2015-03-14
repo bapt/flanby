@@ -156,7 +156,7 @@
 		\item sub packages (ports related)
 		\item flavours/alternatives (ports related)
 		\item List of supported ABI
-		\item Maybe extensibility: plugins? lua? duktape?
+		\item Maybe extensibility: plugins? lua? duktape? jimtcl?
 		\item Transactions
 		\item More regression tests
 		\item 3rd party repositories:
@@ -178,7 +178,9 @@
 		\item Lots of bugfixes
 		\item Custom keywords can have arguments in plist
 		\item Initial support for provides/requires
-		\item public API now C++ friendly
+		\item Public API now C++ friendly
+		\item Support to package files with immutable flags as a user
+		\item Initial support for cross installation
 	\end{itemize}
 \end{frame}
 
@@ -188,22 +190,24 @@
 	\begin{itemize}
 		\item Keep base as a one true entity
 		\item Fine grain package to reduce security updates
-		\item All options in separate packages
+		\item Most options in separate packages
 		\item Development tools in separate packages
+		\item Debug packages
 		\item Ability on only install runtime things (no .a, no .h etc)
 		\item Ability for developers to provide a custom repository to allow users to test their changes. Example: a new libc++
+		\item 3 way merge to handle /etc files
+		\item Ability to create packages as root and user
 	\end{itemize}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Packaging base\\\begin{CJK}{UTF8}{min}パッケージ・ベース\end{CJK}}
+	\framesubtitle{What and when}
 	\begin{itemize}
-		\item 4 meta packages (kernel, base, developement, debug)
-		\item Fine grain small packages
-		\item 3 way merge to handle /etc files
 		\item Packages for RELEASES and security fixes
 		\item Packages for STABLE branches
 		\item Packages for HEAD
+		\item Starting from FreeBSD 11.0-RELEASE
 	\end{itemize}
 \end{frame}
 
