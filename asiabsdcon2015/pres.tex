@@ -29,7 +29,7 @@
 
 \begin{frame}
 	\frametitle{Once upon a time... the binary packages\\\begin{CJK}{UTF8}{min}昔々...バイナリパッケージ\end{CJK}}
-	Other OS:
+	Other OSes:
 	\begin{itemize}
 		\item NetBSD:
 			\begin{itemize}
@@ -46,7 +46,7 @@
 		\item Linux:
 			\begin{itemize}
 				\item apt/dpkg: full featured, GPLv2, no library
-				\item yum/rpm: full featured, GPLv2, no library
+				\item yum/rpm: full featured, GPLv2, no library, slow
 				\item libsolv: very good solver, MIT, strict semantic not ports friendly
 			\end{itemize}
 	\end{itemize}
@@ -77,12 +77,23 @@
 		\item One command to rule them all
 		\item Simple UI
 		\item Only depend on base
-		\item Ports friendly
 		\item Fast enough with 25k packages
 		\item BSD license
 		\item Portable
-		\item Extensible (ucl keywords)
+		\item Extensible (ucl keywords, plugins)
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Principles\\\begin{CJK}{UTF8}{min}原則\end{CJK}}
+	\begin{itemize}
+		\item Ports friendly
 		\item Binary centric
+		\item Sanboxed
+		\item Signing support
+		\item Cross installation friendly
+		\item Rethink \{pre,post\}-\{install,deinstall\} script
+		\item Event based
 	\end{itemize}
 \end{frame}
 
@@ -92,7 +103,7 @@
 	\begin{itemize}
 		\item Sept. 2010: First commit
 		\item March 2011: pkgng 0.1-alpha1
-		\item January 2012: 1.0 beta1:\\ pkg enters in the ports tree
+		\item January 2012: 1.0 beta1: pkg enters in the ports tree
 		\item August 2012: 1.0
 		\item October 2012: default on -CURRENT
 		\item June 2013: 1.1
@@ -110,8 +121,8 @@
 	\begin{itemize}
 		\item December 2012: Dports creation
 		\item January 2013: Announcement
-		\item April 2013: 3.4 \\ Support both pkg and pkgsrc
-		\item November 2013: 3.6 \\ pkg only
+		\item April 2013: 3.4 Support both pkg and pkgsrc
+		\item November 2013: 3.6 pkg only
 	\end{itemize}
 \end{frame}
 
@@ -214,10 +225,10 @@
 \begin{frame}
 	\frametitle{Some links\\\begin{CJK}{UTF8}{min}いくつかのリンク\end{CJK}}
 	\begin{itemize}
-		\item pkg: \url{https://github.com/freebsd/pkg}
-		\item issues: \url{https://github.com/freebsd/pkg/issues} \\
-		\item introduction: \url{https://www.freebsd.org/doc/handbook/pkgng-intro.html}
-		\item packaging base: \url{https://svnweb.freebsd.org/base/projects/release-pkg}
+		\item pkg: \\ \small \url{https://github.com/freebsd/pkg}
+		\item \normalsize issues: \\ \small \url{https://github.com/freebsd/pkg/issues} \\
+		\item \normalsize introduction: \\ \small \url{https://www.freebsd.org/doc/handbook/pkgng-intro.html}
+		\item \normalsize packaging base: \\ \small \url{https://svnweb.freebsd.org/base/projects/release-pkg}
 	\end{itemize}
 \end{frame}
 
