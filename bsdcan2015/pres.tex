@@ -1,0 +1,173 @@
+\input{../ganditemplate/freebsd.tex}
+\usepackage{color}
+\usepackage{listings}
+\definecolor{indigo}{rgb}{0.29, 0.0, 0.51}
+\newcommand{\prestitle}{BSDCan 2015}
+\lstset{
+	numbers=none,
+	frame=l,
+	aboveskip=0pt, belowskip=0pt
+}
+
+\title{FreeBSD: packaging base}
+\subtitle{A rainbow bikeshed}
+\author{Baptiste Daroussin \\ \url{bapt@FreeBSD.org}}
+\institute{\includegraphics[scale=0.13]{../ganditemplate/Gandi_logo_black.eps}\hspace{80pt}\includegraphics[scale=0.5]{../ganditemplate/logo.pdf}}
+\date{BSDCan 2015 \\ Ottawa \\ June 13st, 2015}
+
+\begin{document}
+\begin{frame}[plain]
+	\titlepage
+\end{frame}
+
+\begin{frame}
+	\frametitle{Why?}
+	\begin{itemize}
+		\item Binary upgrade of the system
+			\begin{itemize}
+				\item For RELEASE (like freebsd-update)
+				\item For STABLE
+				\item For CURRENT
+			\end{itemize}
+		\item Allow users to do fine grain installations (no toolchain, no sendmail, etc.)
+		\item Allow developers to provide packages for users to test
+		\item Fine grain merging of configuration files
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Packaging base}
+	\center
+	\includegraphics[scale=0.6]{rainbow-bikeshed.jpg}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Packaging base?}
+	\pause
+	\colorbox{red}{\makebox[\textwidth]{\textcolor{white}{Do not split}}}
+	\pause
+	\colorbox{orange}{\makebox[\textwidth]{Allow minimal installation}}
+	\pause
+	\colorbox{yellow}{\makebox[\textwidth]{No toolchain}}
+	\pause
+	\colorbox{green}{\makebox[\textwidth]{No sendmail}}
+	\pause
+	\colorbox{blue}{\makebox[\textwidth]{\textcolor{white}{No development file}}}
+	\pause
+	\colorbox{indigo!75}{\makebox[\textwidth]{\textcolor{white}{No documentation}}}
+	\pause
+	\colorbox{violet}{\makebox[\textwidth]{\textcolor{white}{I want debug files}}}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Let's try to paint it rainbow}
+	\colorbox{red}{\makebox[\textwidth]{\textcolor{white}{FreeBSD FreeBSD-base FreeBSD-kernel FreeBSD-docs}}}
+	\pause
+	\colorbox{orange}{\makebox[\textwidth]{FreeBSD-minimal FreeBSD-develepment}}
+	\pause
+	\colorbox{yellow}{\makebox[\textwidth]{FreeBSD-toolchain}}
+	\pause
+	\colorbox{green}{\makebox[\textwidth]{FreeBSD-sendmail FreeBSD-openssl FreeBSD-bhyve}}
+	\pause
+	\colorbox{blue}{\makebox[\textwidth]{\textcolor{white}{runtime separated from development files}}}
+	\pause
+	\colorbox{indigo!75}{\makebox[\textwidth]{\textcolor{white}{FreeBSD-docs (does not concern manpages)}}}
+	\pause
+	\colorbox{violet}{\makebox[\textwidth]{\textcolor{white}{-debug packages}}}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Goals}
+	\begin{itemize}
+		\item Integrated into the build system
+			\begin{lstlisting}
+			$ make packages
+			\end{lstlisting}
+		\item Buildable as regular user
+		\item Reproductible
+		\item Automatically handling configuration files (merging)
+		\item Cross installable
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Modification needed in pkg(8)}
+	\begin{itemize}
+		\item Handling file flags immutable (added in pkg 1.5)
+		\item Ability to handle configuration files and merge them (added in pkg 1.5)
+			\begin{itemize}
+				\item new keyword @config
+				\item 3 way merge code from the fossil VCS
+			\end{itemize}
+		\item Better support for cross installation:
+			\begin{itemize}
+				\item pkg -r <rootdir> (added in pkg 1.5)
+				\item scripts PKG\_ROOTDIR (added in pkg 1.5)
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Hooking in the build system}
+	\begin{itemize}
+		\item Reuse the -DNO\_ROOT mechanism
+		\item Add tags to the generated mtree to determine packages content
+		\item New targets:
+			\begin{itemize}
+				\item stageworld
+				\item stagekernel
+				\item packages
+			\end{itemize}
+		\item Packages metadata
+			\begin{itemize}
+				\item UCL manifest
+				\item release/pkg
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Issues with the build system}
+	\begin{itemize}
+		\item bsd.tests.mk/bsd.progs.mk installing files multiple times - BLOCKER
+		\item etc configuration files
+		\item Issues with -DNO\_ROOT
+			\begin{itemize}
+				\item Hardlinks on immutable files
+				\item Installation not using install(1)
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{End user point of view}
+	\begin{itemize}
+		\item Upgrading the system:
+			\begin{lstlisting}
+			$ pkg upgrade
+			\end{lstlisting}
+		\item Creating a FreeBSD disk:
+			\begin{lstlisting}
+			$ mkdir newimage
+			$ pkg -r newimage install FreeBSD
+			$ makefs -B little FreeBSD.img newimage
+			\end{lstlisting}
+		\item Creating an armv6 disk image on an amd64 host:
+			\begin{lstlisting}
+			$ mkdir armv6image
+			$ pkg -r armv6image -o "ABI=FreeBSD:11:armv6" install FreeBSD-minimal
+			$ makefs -B little FreeBSD.img armv6newimage
+			\end{lstlisting}
+		\item Upgrading and armv6 image on an amd64 host:
+			\begin{lstlisting}
+			$ pkg -r armv6image upgrade
+			\end{lstlisting}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Questions?}
+	\center
+	\Huge Thanks
+\end{frame}
+\end{document}
