@@ -21,21 +21,6 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Why?}
-	\begin{itemize}
-		\item Binary upgrade of the system
-			\begin{itemize}
-				\item For RELEASE (like freebsd-update)
-				\item For STABLE
-				\item For CURRENT
-			\end{itemize}
-		\item Allow users to do fine grain installations (no toolchain, no sendmail, etc.)
-		\item Allow developers to provide packages for users to test
-		\item Fine grain merging of configuration files
-	\end{itemize}
-\end{frame}
-
-\begin{frame}
 	\frametitle{Packaging base}
 	\center
 	\includegraphics[scale=0.6]{rainbow-bikeshed.jpg}
@@ -74,6 +59,21 @@
 	\colorbox{indigo!75}{\makebox[\textwidth]{\textcolor{white}{FreeBSD-docs (does not concern manpages)}}}
 	\pause
 	\colorbox{violet}{\makebox[\textwidth]{\textcolor{white}{-debug packages}}}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Why?}
+	\begin{itemize}
+		\item Binary upgrade of the system
+			\begin{itemize}
+				\item For RELEASE (like freebsd-update)
+				\item For STABLE
+				\item For CURRENT
+			\end{itemize}
+		\item Allow users to do fine grain installations (no toolchain, no sendmail, etc.)
+		\item Allow developers to provide packages for users to test
+		\item Fine grain merging of configuration files
+	\end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -126,12 +126,45 @@
 	\end{itemize}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[fragile]
+	\frametitle{Issues with the build system: NO\_ROOT}
+	\begin{itemize}
+		\item mtree(8):
+			In \underline{stdout}:
+			\begin{lstlisting}
+			===> share/examples (install)
+			.:      user (0, 1001, not modified: Operation not permitted)
+			lib32:  user (0, 1001, not modified: Operation not permitted)
+			lib32/dtrace: 
+			        user (0, 1001, not modified: Operation not permitted)
+			lib32/i18n: 
+			        user (0, 1001, not modified: Operation not permitted)
+			\end{lstlisting}
+		\item chflags(1) vs modes:
+			\begin{lstlisting}
+			chflags: /usr/obj/home/bapt/dev/src-trees/release-pkg/stage/usr/bin/chpass: Operation not permitted
+			chflags: /usr/obj/home/bapt/dev/src-trees/release-pkg/stage/usr/bin/passwd: Operation not permitted
+			\end{lstlisting}
+
+		\item Installation not using install(1)
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
 	\frametitle{Issues with the build system}
 	\begin{itemize}
 		\item bsd.tests.mk/bsd.progs.mk installing files multiple times - BLOCKER
 		\item etc configuration files
 		\item Issues with -DNO\_ROOT
+			\begin{lstlisting}
+			===> share/examples (install)
+			.:      user (0, 1001, not modified: Operation not permitted)
+			lib32:  user (0, 1001, not modified: Operation not permitted)
+			lib32/dtrace: 
+			        user (0, 1001, not modified: Operation not permitted)
+			lib32/i18n: 
+			        user (0, 1001, not modified: Operation not permitted)
+			\end{lstlisting}
 			\begin{itemize}
 				\item Hardlinks on immutable files
 				\item Installation not using install(1)
