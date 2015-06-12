@@ -137,17 +137,39 @@
 	\begin{itemize}
 		\item Reuse the -DNO\_ROOT mechanism
 		\item Add tags to the generated mtree to determine packages content
+		\item Automatic plist generation
+		\item Packages metadata
+			\begin{itemize}
+				\item UCL manifest
+				\item release/packages/*.ucl
+			\end{itemize}
 		\item New targets:
 			\begin{itemize}
 				\item stageworld
 				\item stagekernel
 				\item packages
 			\end{itemize}
-		\item Packages metadata
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Integration in the build system}
+	\begin{itemize}
+		\item Tags (automatic via bsd.*.mk):
 			\begin{itemize}
-				\item UCL manifest
-				\item release/pkg
+				\item package=runtime
+				\item development
+				\item config (not automatic)
 			\end{itemize}
+		\item Overwritting (cherrypicking files for a new package)
+			\begin{lstlisting}
+			PROG=		bhyve
+			PACKAGE=	bhyve
+
+			MAN=		bhyve.8
+
+			[...]
+			\end{lstlisting}
 	\end{itemize}
 \end{frame}
 
