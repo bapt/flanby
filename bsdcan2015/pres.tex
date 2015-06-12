@@ -66,9 +66,9 @@
 	\begin{itemize}
 		\item Binary upgrade of the system
 			\begin{itemize}
-				\item For RELEASE (like freebsd-update)
-				\item For STABLE
-				\item For CURRENT
+				\item For RELEASE (like freebsd-update) (11.0[\_X])
+				\item For STABLE 11.1.s<date>
+				\item For CURRENT 12.s<date>
 			\end{itemize}
 		\item Allow users to do fine grain installations (no toolchain, no sendmail, etc.)
 		\item Allow developers to provide packages for users to test
@@ -151,23 +151,20 @@
 \end{frame}
 
 \begin{frame}[fragile]
-	\frametitle{Issues with the build system}
+	\frametitle{Issues with the build system: installworld crap}
 	\begin{itemize}
 		\item bsd.tests.mk/bsd.progs.mk installing files multiple times - BLOCKER
-		\item etc configuration files
-		\item Issues with -DNO\_ROOT
 			\begin{lstlisting}
-			===> share/examples (install)
-			.:      user (0, 1001, not modified: Operation not permitted)
-			lib32:  user (0, 1001, not modified: Operation not permitted)
-			lib32/dtrace: 
-			        user (0, 1001, not modified: Operation not permitted)
-			lib32/i18n: 
-			        user (0, 1001, not modified: Operation not permitted)
+			===> Creating FreeBSD-runtime-11.0.s20150612175342
+			pkg: duplicate file listing: /usr/tests/lib/libc/db/db_test, ignoring
+			pkg: duplicate file listing: /usr/tests/lib/libc/gen/posix_spawn/h_nonexec, ignoring
+			pkg: duplicate file listing: /usr/tests/lib/libc/gen/posix_spawn/h_zero, ignoring
+			pkg: duplicate file listing: /usr/tests/lib/libc/gen/posix_spawn/h_nonexec, ignoring
 			\end{lstlisting}
+		\item etc configuration files
 			\begin{itemize}
-				\item Hardlinks on immutable files
-				\item Installation not using install(1)
+				\item{generates the db files}
+				\item{not installed at installworld time}
 			\end{itemize}
 	\end{itemize}
 \end{frame}
