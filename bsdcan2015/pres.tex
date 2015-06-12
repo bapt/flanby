@@ -66,13 +66,14 @@
 	\begin{itemize}
 		\item Binary upgrade of the system
 			\begin{itemize}
-				\item For RELEASE (like freebsd-update) (11.0[\_X])
-				\item For STABLE 11.1.s<date>
-				\item For CURRENT 12.s<date>
+				\item For RELEASE (like freebsd-update)
+				\item For STABLE
+				\item For CURRENT
 			\end{itemize}
 		\item Allow users to do fine grain installations (no toolchain, no sendmail, etc.)
 		\item Allow developers to provide packages for users to test
 		\item Fine grain merging of configuration files
+		\item Being able to upgrade the loader and its configurations!
 	\end{itemize}
 \end{frame}
 
@@ -85,8 +86,32 @@
 			\end{lstlisting}
 		\item Buildable as regular user
 		\item Reproductible
+			\begin{lstlisting}
+			$ make repackages
+			\end{lstlisting}
+		\item Automatic version bump on the right packages when patching
+			a release
+			\begin{lstlisting}
+			$ make rerelease
+			\end{lstlisting}
 		\item Automatically handling configuration files (merging)
 		\item Cross installable
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Versionning}
+	\begin{itemize}
+		\item CURRENT: 12.s<date>
+		\item STABLE: After 11.0-RELEASE and before 11.1-RELEASE: 11.1.s<date>
+		\item RELEASE:
+			\begin{itemize}
+				\item ALPHA: 11.0.aX
+				\item BETA: 11.0.bX
+				\item RC: 11.0.pX (not r to not confuse with "release")
+				\item RELEASE: 11.0
+				\item Security fix: 11.0\_1
+			\end{itemize}
 	\end{itemize}
 \end{frame}
 
