@@ -1,0 +1,265 @@
+\input{../ganditemplate/freebsd.tex}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{tipa}
+\usepackage{svg}
+\definecolor{indigo}{rgb}{0.29, 0.0, 0.51}
+\newcommand{\prestitle}{EuroBSDCon 2015}
+\lstset{
+	numbers=none,
+	frame=l,
+	aboveskip=0pt, belowskip=0pt
+}
+
+\title{Poudrière}
+\subtitle{Efficient package building}
+\author{Baptiste Daroussin \\ \url{bapt@FreeBSD.org}}
+\institute{\includegraphics[scale=0.13]{../ganditemplate/Gandi_logo_black.eps}\hspace{80pt}\includegraphics[scale=0.5]{../ganditemplate/logo.pdf}}
+\date{EuroBSDCon 2015 \\ Stockholm \\ Octobre 4th, 2015}
+
+\begin{document}
+\begin{frame}[plain]
+	\titlepage
+\end{frame}
+
+\begin{frame}
+	\frametitle{poudri...GNI?: [pu.d\textipa{\textinvscr}i.je\textipa{\textinvscr}]}
+	\begin{itemize}
+		\item Package building system
+		\item Port tester
+		\item Quality insurance on packages
+		\item Package repository generator
+		\item System stress tool
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{History}
+	\begin{itemize}
+		\item 2010-07: Initial work
+		\item 2011: Start to be known and used in the french community
+		\item 2012-01-31: 1.0 - enter the ports tree
+		\item 2012-04-08: 1.2 - limit network on fetch phase
+		\item 2012-05-15: 1.3 - pbi support, attract interest of bdrewery@
+		\item 2012-08-28: 2.0 - parallel build, ugly html UI (bapt as a designer)
+		\item 2012-10-15: 2.2 - Removal of pbi support, support for "sets"
+		\item 2013-05-20: 3.0 - ZFS optional, full tmpfs support, nice and reactive web UI (bdrewery designer)
+		\item 2013-07: Used in the FreeBSD cluster
+		\item 2013-09-22: 3.0.3 - support staging, initial qemu support
+		\item 2014-12-04: 3.1.0 - Yet a better web UI
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Design}
+	\begin{itemize}
+		\item Simple
+			\begin{itemize}
+				\item Easy to setup:
+					\begin{itemize}
+						\item only depend on base (by default)
+						\item one simple configuration file
+						\item few command to prepare the resources
+					\end{itemize}
+				\item Easy to use
+					\begin{itemize}
+						\item One single command
+						\item Simple subcommands
+					\end{itemize}
+			\end{itemize}
+		\item Resource efficient
+			\begin{itemize}
+				\item parallel build: by default 1 core == 1 package building
+				\item low overhead (resources should be dedicated to build sources not for poudriere itself)
+			\end{itemize}
+		\item Safe and contained
+			\begin{itemize}
+				\item all builds in clean jail(8)
+				\item only access network during fetch phase
+				\item build as regular user
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Design}
+	Subcommands:
+	\begin{itemize}
+		\item bulk: Generate packages for given ports
+		\item jail: Manage the jails used by poudriere
+		\item ports: Create, update or delete the portstrees
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Poudrière: jails}
+	\begin{itemize}
+			\pause
+		\item Fetch release/snapshot/old releases sets
+			\pause
+		\item Build from sources: git, svn, file, support for branches
+			\pause
+		\item Full support for src.conf
+			\pause
+		\item Support for multiple arches (via qemu user emulation)
+			\pause
+		\item Can have kernel
+			\pause
+		\item Updateable (via sources or freebsd-update)
+	\end{itemize}
+	\pause
+	Creating a jail
+	\begin{lstlisting}
+poudriere jail -c -j 102 -v 10.2-RELEASE
+\end{lstlisting}
+	\pause
+	Updating a jail
+	\begin{lstlisting}
+poudriere jail -u -j 102
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Poudrière: ports}
+	\begin{itemize}
+			\pause
+		\item Fetch from portsnap, git, svn
+			\pause
+		\item Notion of "default" ports tree
+			\pause
+	\end{itemize}
+	\pause
+	Creating a ports tree
+	\begin{lstlisting}
+poudriere ports -c -p portstree
+\end{lstlisting}
+	\pause
+	Updating a ports tree
+	\begin{lstlisting}
+poudriere ports -u -p portstree
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Poudrière: bulk}
+	\begin{itemize}
+			\pause
+		\item Associate a ports tree, a jail and a list of packages to build
+			\pause
+		\item Massively parallelized (1 port per core, can be find tuned)
+			\pause
+		\item Support ccache
+			\pause
+		\item Tuneable via: make.conf (fine grained [<jailname>-[<setname>-[<portstree>-]]]make.conf)
+			\pause
+		\item Nice WebUI (static files made dynamic via js)
+			\pause
+		\item Nice cli (with colors and siginfo support)
+			\pause
+		\item Hooks support
+			\pause
+		\item Repository generation support (including signature)
+			\pause
+		\item Default ports tree support
+			\pause
+		\item Incremental support (aggressive)
+			\pause
+		\item Restricted support
+			\pause
+		\item Saving workdir after failure
+			\pause
+		\item Autodetection of rebuild
+			\pause
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Poudrière: bulk}
+	Building packages:
+	\begin{lstlisting}
+poudriere bulk -j 102 -f listofpackages.txt
+\end{lstlisting}
+	Building packages with Q/A:
+	\begin{lstlisting}
+poudriere bulk -j 102 -t -f listofpackages.txt
+\end{lstlisting}
+	Building all ports
+	\begin{lstlisting}
+poudriere bulk -j 102 -a
+\end{lstlisting}
+	Building all ports with a special "set"
+	\begin{lstlisting}
+poudriere bulk -z test1 -j 102 -a
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Poudrière: a stress tool}
+	In FreeBSD:
+	\begin{itemize}
+		\item ZFS deadlocks
+		\item tmpfs deadlocks
+		\item nullfs deadlocks
+		\item tons of fixes in sh(1) in particular regarding job control
+		\item highlight contentions
+	\end{itemize}
+	In Dragonfly:
+	\begin{itemize}
+		\item Used as a benchmark tool in 2013
+		\item Lots of performance improvement between December 26, 2012 and March 15, 2013 (released in 3.4)
+		\item Lots of panics fixed
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Poudrière: under the hood}
+	\begin{itemize}
+			\pause
+		\item Mostly coded in sh(1) (clean and maintainable shell is possible!)
+			\pause
+		\item Small bits in C for perfomances
+			\pause
+		\item Lots of care made on efficiency:
+			\begin{itemize}
+				\item avoid subshells as much as possible
+				\item parallelize as many things as possible
+				\item reuse resources as much as possible
+			\end{itemize}
+		\item Use filesystem as a Key/Value DB (on tmpfs for speed)
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Poudrière: image (soon)}
+	\begin{itemize}
+		\item Associate jails, packages and overlays
+		\item Able to generates usable images:
+			\begin{itemize}
+				\item Isos: with or without mfsroot
+				\item Usb disk: with or without mfsroot
+				\item GPT base firmwares (NanoBSD-like)
+				\item plain mfsroot
+				\item rawdisk (VMs)
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Poudrière: links}
+	\begin{itemize}
+		\item https://github.com/freebsd/poudriere/
+		\item https://github.com/freebsd/poudriere/wiki
+		\item https://www.freebsd.org/doc/handbook/ports-poudriere.html
+		\item https://www.freebsd.org/doc/en/books/porters-handbook/testing-poudriere.html
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Questions?}
+	\center
+	\includegraphics{poudriere.eps}
+	\\
+	\Huge Thanks
+\end{frame}
+
+\end{document}
