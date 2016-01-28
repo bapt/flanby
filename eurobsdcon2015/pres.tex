@@ -15,7 +15,7 @@
 \subtitle{Efficient package building}
 \author{Baptiste Daroussin \\ \url{bapt@FreeBSD.org}}
 \institute{\includegraphics[scale=0.13]{../ganditemplate/Gandi_logo_black.eps}\hspace{80pt}\includegraphics[scale=0.5]{../ganditemplate/logo.pdf}}
-\date{EuroBSDCon 2015 \\ Stockholm \\ Octobre 4th, 2015}
+\date{EuroBSDCon 2015 \\ Stockholm \\ October 4th, 2015}
 
 \begin{document}
 \begin{frame}[plain]
@@ -105,7 +105,7 @@
 			\pause
 		\item Can have kernel
 			\pause
-		\item Updateable (via sources or freebsd-update)
+		\item Updatable (via sources or freebsd-update)
 	\end{itemize}
 	\pause
 	Creating a jail
@@ -126,7 +126,6 @@ poudriere jail -u -j 102
 		\item Fetch from portsnap, git, svn
 			\pause
 		\item Notion of "default" ports tree
-			\pause
 	\end{itemize}
 	\pause
 	Creating a ports tree
@@ -146,7 +145,7 @@ poudriere ports -u -p portstree
 			\pause
 		\item Associate a ports tree, a jail and a list of packages to build
 			\pause
-		\item Massively parallelized (1 port per core, can be find tuned)
+		\item Massively parallelized (1 port per core, fine grain tuning possible)
 			\pause
 		\item Support ccache
 			\pause
@@ -154,7 +153,7 @@ poudriere ports -u -p portstree
 			\pause
 		\item Nice WebUI (static files made dynamic via js)
 			\pause
-		\item Nice cli (with colors and siginfo support)
+		\item Nice cli (with colors and SIGINFO support)
 			\pause
 		\item Hooks support
 			\pause
@@ -169,7 +168,6 @@ poudriere ports -u -p portstree
 		\item Saving workdir after failure
 			\pause
 		\item Autodetection of rebuild
-			\pause
 	\end{itemize}
 \end{frame}
 
@@ -207,8 +205,23 @@ poudriere bulk -z test1 -j 102 -a
 	\begin{itemize}
 		\item Used as a benchmark tool in 2013
 		\item Lots of performance improvement between December 26, 2012 and March 15, 2013 (released in 3.4)
+		\item Lots of scalability improvements on large multi-core
 		\item Lots of panics fixed
 	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Poudrière: Dragonfly improvements}
+	\begin{columns}[T]
+		\begin{column}{.48\textwidth}
+			Build time in minutes
+			\includegraphics[width=\textwidth]{graph1.png}
+		\end{column}
+		\begin{column}{.48\textwidth}
+			Number of packages per hours
+			\includegraphics[width=\textwidth]{graph2.png}
+		\end{column}
+	\end{columns}
 \end{frame}
 
 \begin{frame}
@@ -217,7 +230,7 @@ poudriere bulk -z test1 -j 102 -a
 			\pause
 		\item Mostly coded in sh(1) (clean and maintainable shell is possible!)
 			\pause
-		\item Small bits in C for perfomances
+		\item Small bits in C
 			\pause
 		\item Lots of care made on efficiency:
 			\begin{itemize}
@@ -225,7 +238,82 @@ poudriere bulk -z test1 -j 102 -a
 				\item parallelize as many things as possible
 				\item reuse resources as much as possible
 			\end{itemize}
+			\pause
 		\item Use filesystem as a Key/Value DB (on tmpfs for speed)
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Poudrière: truss -fc}
+	\begin{lstlisting}
+syscall                     seconds   calls  errors
+fcntl                   0.000012803       1       0
+fork                    0.000131565       1       0
+getegid                 0.000011390       1       0
+geteuid                 0.000023009       2       0
+getgid                  0.000011620       1       0
+getpid                  0.000011494       1       0
+getppid                 0.000011767       1       0
+getuid                  0.000011717       1       0
+[...]
+mmap                    0.000370901      22       0
+open                    0.000182884       6       0
+openat                  0.000122017       6       0
+close                   0.000213574      14       0
+fstat                   0.000233375      11       0
+lstat                   0.000166041       6       1
+write                   0.000021875       1       0
+access                  0.000048576       3       0
+sigaction               0.000112313       6       0
+sigprocmask             0.000173640      10       0
+__getcwd                0.000079150       1       0
+pipe                    0.000017026       1       0
+munmap                  0.000115129       8       0
+read                    0.001368036      12       0
+wait4                   0.000079314       1       0
+sysarch                 0.000012172       1       0
+                      ------------- ------- -------
+                        0.003621732     124       2
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Poudrière: examples}
+	\begin{columns}[T]
+	\begin{column}{.48\textwidth}
+	\begin{lstlisting}
+#!/bin/sh
+testfct() {
+        echo yes
+}
+
+test=$(testfct)
+echo $test
+\end{lstlisting}
+	\end{column}
+	\begin{column}{.48\textwidth}
+	\begin{lstlisting}
+#!/bin/sh
+testfct() {
+        setvar "$1" "yes"
+        # or more posix eval $1="yes"
+}
+
+testfct test
+echo $test
+\end{lstlisting}
+	\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Poudrière: know your tools}
+	\begin{itemize}
+		\item abuse xargs!
+		\item learn awk! stop the "| grep | sed | grep | cut" (proper string matching)
+		\item learn sed! stop the "| sed | sed | sed"
+		\item sh(1) can play with file descriptors (only 10 on POSIX shells)
+		\item set -e !
 	\end{itemize}
 \end{frame}
 
@@ -241,6 +329,7 @@ poudriere bulk -z test1 -j 102 -a
 				\item plain mfsroot
 				\item rawdisk (VMs)
 			\end{itemize}
+		\item Reusing code/ideas from NanoBSD/Crochet
 	\end{itemize}
 \end{frame}
 
