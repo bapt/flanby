@@ -1,0 +1,189 @@
+\input{../ganditemplate/freebsd.tex}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{tipa}
+\usepackage{svg}
+\definecolor{indigo}{rgb}{0.29, 0.0, 0.51}
+\newcommand{\prestitle}{FOSDEM 2016}
+\lstset{
+	numbers=none,
+	frame=l,
+	aboveskip=0pt, belowskip=0pt
+}
+
+\usepackage{tikz}
+
+\title{Reproducible builds in ports}
+\author{Baptiste Daroussin \\ \url{bapt@FreeBSD.org}}
+\institute{\includegraphics[scale=0.13]{../ganditemplate/Gandi_logo_black.eps}\hspace{80pt}\includegraphics[scale=0.5]{../ganditemplate/logo.pdf}}
+\date{FOSDEM 2016 \\ Brussels \\ January 31, 2016}
+
+\begin{document}
+\begin{frame}[plain]
+	\titlepage
+\end{frame}
+
+\begin{frame}
+	\frametitle{A shared effort}
+	\center{http://reproducible-builds.org/}
+	\begin{tikzpicture}
+		\node[inner sep=0pt] at (-0.5,0){\includegraphics[height=25pt]{archlinux.eps}};
+		\node[inner sep=0pt] at (-1,-2.9){\includegraphics[height=25pt]{baserock.eps}};
+		\node[inner sep=0pt] at (1.5,-2.6){\includegraphics[height=25pt]{Bitcoin.eps}};
+		\node[inner sep=0pt] at (3.5,-1){\includegraphics[height=25pt]{coreboot.eps}};
+		\node[inner sep=0pt] at (6,-5){\includegraphics[height=40pt]{debian.eps}};
+		\node[inner sep=0pt] at (3.8,-4){\includegraphics[height=25pt]{Fedora_logo.eps}};
+		\node[inner sep=0pt] at (0.9,-1.2){\includegraphics[height=25pt]{Gnu_Guix_logo.eps}};
+		\node[inner sep=0pt] at (8,-3.6){\includegraphics[height=25pt]{NetBSD.eps}};
+		\node[inner sep=0pt] at (5,-2.5){\includegraphics[height=25pt]{Openwrt_Logo.eps}};
+		\node[inner sep=0pt] at (6,-0.6){\includegraphics[height=25pt]{Tor.eps}};
+		\node[inner sep=0pt] at (-0.2,-4.6){\includegraphics[height=25pt]{../ganditemplate/logo.pdf}};
+	\end{tikzpicture}%
+\end{frame}
+
+\begin{frame}
+	\frametitle{What is that?}
+	\center{\huge{basically: Rebuild twice, same result}}
+\end{frame}
+
+\begin{frame}
+	\frametitle{What is it useful for}
+	Obvious:
+	\begin{itemize}
+		\item Creating binary patches: delta packages, freebsd-update
+		\item Verify the binary distributed
+		\item Reduce package repository storage size (dedup)
+		\item Reduce the bandwith when mirroring
+	\end{itemize}
+	\pause
+	But not only: more accurate exp-run!
+	\begin{itemize}
+		\item better track changing toolchain components
+		\item better track what packages are inpacted by a change in headers/macros: bump portrevision
+		\item better track what packages uses static libraries: improved packaging Q/A
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Hey that's easy... hum... maybe not}
+	Issues:
+	\begin{itemize}
+		\item timestamp
+		\pause
+		\item hostname
+		\pause
+		\item username
+		\pause
+		\item threaded producers
+		\pause
+		\item optimisations
+		\pause
+		\item toolchain
+		\pause
+		\item build path
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Upstream solutions}
+	For timestamps:
+	\begin{itemize}
+		\item Stop storing build timestamps when possible
+	\item If impossible: support \href{https://reproducible-builds.org/specs/source-date-epoch/}{SOURCE\_DATE\_EPOCH}
+	\end{itemize}
+	\pause
+	For hostname:
+	\begin{itemize}
+		\item Stop storing build hostname
+	\end{itemize}
+	\pause
+	For username:
+	\begin{itemize}
+		\item Stop storing build username
+	\end{itemize}
+	\pause
+	For threaded consumers
+	\begin{itemize}
+		\item Allow the build system to control the number of threads
+	\end{itemize}
+	\pause
+	For toolchain/optimisations
+	\begin{itemize}
+		\item Ensure the build system respect CFLAGS, CC, CXX, LD, etc.
+	\end{itemize}
+	\pause
+	For build path
+	\begin{itemize}
+		\item Stop sroting the build path
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Right but what about reality: ports}
+	\pause
+	\center{\huge{Use poudrière}}
+	\center{\includegraphics{../eurobsdcon2015/poudriere.eps}}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Poudrière}
+	Controled environment:
+	\begin{itemize}
+		\item Always build with the same user
+		\item Use jails which allows:
+			\begin{itemize}
+				\item Controlling the hostname
+				\item Controlling the kernel name/reldate (not used yet because too recent)
+			\end{itemize}
+		\item Controls the kernel name/reldate
+		\item Controls the build path
+		\item Define a reproducible build env
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Then why not there yet?}
+	\begin{itemize}
+		\pause
+		\item Timestamps:
+			\begin{itemize}
+				\item pkg 1.6.3+ (add support for SOURCE\_DATE\_EPOCH
+				\item ports not exposing SOURCE\_DATE\_EPOCH: \href{https://reviews.freebsd.org/D4385}{D4385}
+			\end{itemize}
+		\pause
+		\item More ports framework improvements needed:
+			\begin{itemize}
+				\item some bytecodes: pyc, elc, zwc, ...
+				\item automatic detection of non reproducibility
+				\item \href{https://diffoscope.org/}{diffoscope}
+			\end{itemize}
+		\pause
+		\item Lots of ports needs patching:
+			\begin{itemize}
+				\item Use gzip -n
+				\item Fix unpredictable tool output
+				\item Add support for SOURCE\_DATE\_EPOCH
+				\item Fix other corner case unpredicability issues
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{SOURCE\_DATE\_EPOCH}
+	Allows a third party to provide a predictable timestamp to the build system/packager when needed \\
+	Ports tree support:
+	\begin{itemize}
+		\item timestamp should not be updated too often
+		\item should be more recent that the distfiles
+		\item added by make makesum to distinfo
+		\item fallback to the date when the support was added
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Questions?}
+	\center
+	\huge Thanks
+\end{frame}
+
+\end{document}
