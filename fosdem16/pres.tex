@@ -5,6 +5,7 @@
 \usepackage{svg}
 \definecolor{indigo}{rgb}{0.29, 0.0, 0.51}
 \newcommand{\prestitle}{FOSDEM 2016}
+\newcommand{\prev}[1]{\href{https://svnweb.freebsd.org/changeset/ports/#1}{r#1}}
 \lstset{
 	numbers=none,
 	frame=l,
@@ -136,10 +137,38 @@
 		\item Timezone of the builder
 	\end{itemize}
 \end{frame}
+
+\begin{frame}
+	\frametitle{FreeBSD base}
+	\begin{itemize}
+		\item Under our control
+			\pause
+		\item Almost done (needed by freebsd-update(8))
+			\pause
+		\item Still issues:
+			\begin{itemize}
+					\pause
+				\item loaders: contains build time/date
+					\pause
+				\item kernel by default (fixed via exporting some env variables)
+					\pause
+				\item aacraid/acpi\_asus modules
+					\pause
+				\item sqlite db file (mandoc) - should not be part of the build system
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
 \begin{frame}
 	\frametitle{Right but what about reality: ports}
+	\begin{itemize}
+			\pause
+		\item I's a wild world
+			\pause
+		\item currently not reproducible
+	\end{itemize}
 	\pause
-	\center{\huge{Use poudrière}}
+	\center{\huge{use poudrière}}
 	\center{\includegraphics{../eurobsdcon2015/poudriere.eps}}
 \end{frame}
 
@@ -177,7 +206,7 @@
 			\begin{itemize}
 				\item some bytecodes: pyc, elc, zwc, ...
 				\item automatic detection of non reproducibility
-				\item \href{https://diffoscope.org/}{diffoscope}
+				\item \href{https://diffoscope.org/}{diffoscope} (just landed in the ports tree \prev{407589})
 			\end{itemize}
 		\pause
 		\item Lots of ports needs patching:
