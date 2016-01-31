@@ -89,24 +89,32 @@
 	For timestamps:
 	\begin{itemize}
 		\item Stop storing build timestamps when possible
-	\item If impossible: support \href{https://reproducible-builds.org/specs/source-date-epoch/}{SOURCE\_DATE\_EPOCH}
+			\pause
+		\item If impossible: support \href{https://reproducible-builds.org/specs/source-date-epoch/}{SOURCE\_DATE\_EPOCH}
 	\end{itemize}
 	\pause
 	For hostname:
 	\begin{itemize}
 		\item Stop storing build hostname
+		\pause
+		\item Provide a mechnaism to override (ex: env var)
 	\end{itemize}
 	\pause
 	For username:
 	\begin{itemize}
 		\item Stop storing build username
+			\pause
+		\item Provide a mechnaism to override (ex: env var)
 	\end{itemize}
 	\pause
 	For threaded consumers
 	\begin{itemize}
 		\item Allow the build system to control the number of threads
 	\end{itemize}
-	\pause
+\end{frame}
+
+\begin{frame}
+	\frametitle{Upstream solutions}
 	For toolchain/optimisations
 	\begin{itemize}
 		\item Ensure the build system respect CFLAGS, CC, CXX, LD, etc.
@@ -114,10 +122,20 @@
 	\pause
 	For build path
 	\begin{itemize}
-		\item Stop sroting the build path
+		\item Stop storing the build path
+			\pause
+		\item Really don't store it!
+	\end{itemize}
+	\pause
+	Otherthing to really not store:
+	\begin{itemize}
+		\item Host CPU identifiers/type
+			\pause
+		\item Locales of the builder
+			\pause
+		\item Timezone of the builder
 	\end{itemize}
 \end{frame}
-
 \begin{frame}
 	\frametitle{Right but what about reality: ports}
 	\pause
@@ -130,13 +148,17 @@
 	Controled environment:
 	\begin{itemize}
 		\item Always build with the same user
+			\pause
 		\item Use jails which allows:
 			\begin{itemize}
 				\item Controlling the hostname
 				\item Controlling the kernel name/reldate (not used yet because too recent)
 			\end{itemize}
+			\pause
 		\item Controls the kernel name/reldate
+			\pause
 		\item Controls the build path
+			\pause
 		\item Define a reproducible build env
 	\end{itemize}
 \end{frame}
@@ -147,7 +169,7 @@
 		\pause
 		\item Timestamps:
 			\begin{itemize}
-				\item pkg 1.6.3+ (add support for SOURCE\_DATE\_EPOCH
+				\item pkg 1.6.3+ (add support for SOURCE\_DATE\_EPOCH)
 				\item ports not exposing SOURCE\_DATE\_EPOCH: \href{https://reviews.freebsd.org/D4385}{D4385}
 			\end{itemize}
 		\pause
