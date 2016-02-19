@@ -1,0 +1,373 @@
+% Word cloud.
+% At the end of the day, the user command is \wordcloud.
+% A typical usage would be
+%
+% \wordcloud[
+%   number-of-words = 3,
+%   style = \color{blue}{#1}]
+%  {list of various tags or words, possibly repeated
+%    to show significance}
+%
+% This makes a wordcloud where tags appear with a size
+% proportional to the number of times they appear in the
+% braced argument.  Only the 3 (or more generally
+% |number-of-words|) words which appear the most often
+% will be displayed.
+
+\RequirePackage{xparse,graphicx,l3sort}
+\ExplSyntaxOn
+\DeclareExpandableDocumentCommand { \wordcloudMaxValue } { }
+  { \int_use:N \l_wordcloud_max_count_int }
+\int_new:N \l_wordcloud_max_count_int
+\prop_new:N \l_wordcloud_count_prop
+\seq_new:N \l_wordcloud_words_seq
+\tl_new:N \l_wordcloud_word_tl
+\tl_new:N \l_wordcloud_tl
+\tl_new:N \l_wordcloud_b_tl
+\int_new:N \l_wordcloud_word_number_int
+\dim_new:N \l_wordcloud_fboxrule_dim
+\dim_new:N \l_wordcloud_fboxsep_dim
+\dim_new:N \l_wordcloud_surround_fboxrule_dim
+\dim_new:N \l_wordcloud_surround_fboxsep_dim
+\fp_new:N \l_wordcloud_angle_increment_fp
+\fp_new:N \l_wordcloud_angle_fp
+\dim_new:N \l_wordcloud_x_dim
+\dim_new:N \l_wordcloud_y_dim
+\fp_new:N \l_wordcloud_best_radius_fp
+\fp_new:N \l_wordcloud_best_angle_fp
+\dim_new:N \g_wordcloud_xmin_dim
+\dim_new:N \g_wordcloud_xmax_dim
+\dim_new:N \g_wordcloud_ymin_dim
+\dim_new:N \g_wordcloud_ymax_dim
+
+\cs_generate_variant:Nn \prop_put:Nnn { Nno }
+\keys_define:nn { wordcloud }
+  {
+    number-of-words   .int_set:N = \l_wordcloud_word_number_int        ,
+    style             .code:n    =
+      { \cs_set_protected:Npn \wordcloud_word_style:nn ##1 ##2 {#1} }  ,
+    surround-fboxrule .dim_set:N = \l_wordcloud_surround_fboxrule_dim  ,
+    surround-fboxsep  .dim_set:N = \l_wordcloud_surround_fboxsep_dim   ,
+    angle-step        .fp_set:N  = \l_wordcloud_angle_increment_fp     ,
+  }
+\DeclareDocumentCommand { \wordcloud } { O { } m }
+  {
+    \dim_set_eq:NN \l_wordcloud_fboxrule_dim \fboxrule
+    \dim_set_eq:NN \l_wordcloud_fboxsep_dim  \fboxsep
+    \dim_set_eq:NN \l_wordcloud_surround_fboxrule_dim \fboxrule
+    \dim_set_eq:NN \l_wordcloud_surround_fboxsep_dim  \fboxsep
+    \int_set_eq:NN \l_wordcloud_word_number_int \c_max_int
+    \fp_set:Nn \l_wordcloud_angle_increment_fp { 10 }
+    \keys_set:nn { wordcloud } {#1}
+    \msg_info:nn { wordcloud } { listing-words }
+    \wordcloud_find_words:n {#2}
+    \wordcloud_tally_words:
+    \wordcloud_sort_words_using_tally:
+    \msg_info:nn { wordcloud } { typesetting-words }
+    \wordcloud_typeset_words:n { \l_wordcloud_word_number_int }
+  }
+\cs_generate_variant:Nn \seq_set_split:Nnn { Nnx }
+\cs_new_protected:Npn \wordcloud_find_words:n #1
+  {
+    \seq_clear:N \l_wordcloud_words_seq
+    \tl_clear:N \l_wordcloud_word_tl
+    \seq_set_split:Nnx \l_wordcloud_words_seq
+      { ~ } { \tl_to_str:n {#1} }
+    \seq_set_map:NNn \l_wordcloud_words_seq
+      \l_wordcloud_words_seq
+      { \tl_map_function:nN {##1} \__wordcloud_filter_letters:n }
+    \seq_remove_all:Nn \l_wordcloud_words_seq { }
+  }
+\cs_new:Npn \__wordcloud_filter_letters:n #1
+  {
+    \int_compare:nTF { `a <= `#1 <= `z } {#1}
+      { \int_compare:nT { `A <= `#1 <= `Z } {#1} }
+  }
+\cs_new_protected_nopar:Npn \wordcloud_tally_words:
+  {
+    % Count occurrences, keeping track of repetition number in a prop.
+    \prop_clear:N \l_wordcloud_count_prop
+    \seq_map_inline:Nn \l_wordcloud_words_seq
+      {
+        \prop_get:NnNTF \l_wordcloud_count_prop {##1} \l_wordcloud_tl
+          {
+            % If the word is not new, add 1 to its count.
+            \tl_set:Nx \l_wordcloud_tl
+              { \int_eval:n { \l_wordcloud_tl + 1 } }
+          }
+          {
+            % Otherwise, initialize the count at 1.
+            \tl_set:Nx \l_wordcloud_tl { 1 }
+          }
+        \prop_put:Nno \l_wordcloud_count_prop {##1} \l_wordcloud_tl
+      }
+    % Then make a seq with items of the form {word}{count}
+    % It would be better to use a different seq.
+    \cs_set:Npn \__wordcloud_tmp:w ##1 ##2 { { {##1} {##2} } }
+    \seq_set_split:Nnx \l_wordcloud_words_seq { }
+      { \prop_map_function:NN \l_wordcloud_count_prop \__wordcloud_tmp:w }
+  }
+\cs_new_protected:Npn \wordcloud_sort_words_using_tally:
+  {
+    \seq_sort:Nn \l_wordcloud_words_seq
+      {
+        % If the second word count is > to the first, then the two words
+        % were in the wrong order (reversed), otherwise, the order is
+        % kept (ordered).
+        \int_compare:nNnTF { \use_ii:nn ##1 } < { \use_ii:nn ##2 }
+          { \sort_reversed: } { \sort_ordered: }
+      }
+    % we also set the max_count, used in the public \wordcloudMaxValue
+    \int_set:Nn \l_wordcloud_max_count_int
+      {
+        \exp_last_unbraced:Nf \use_ii:nn
+          { \seq_item:Nn \l_wordcloud_words_seq { 1 } }
+      }
+  }
+\int_new:N \l_wordcloud_int
+\box_new:N \l_wordcloud_result_box
+\cs_new_protected:Npn \wordcloud_typeset_words:n #1
+  {
+    \dim_gzero:N \g_wordcloud_xmin_dim
+    \dim_gzero:N \g_wordcloud_xmax_dim
+    \dim_gzero:N \g_wordcloud_ymin_dim
+    \dim_gzero:N \g_wordcloud_ymax_dim
+    \hbox_set:Nn \l_wordcloud_result_box
+      {
+        % \rlap{*}
+        \seq_clear:N \l_wordcloud_boxes_seq
+        \int_zero:N \l_wordcloud_int
+        \seq_clear:N \l_wordcloud_typeset_words_seq
+        \seq_map_inline:Nn \l_wordcloud_words_seq
+          {
+            \int_compare:nF { \l_wordcloud_int < #1 } { \seq_map_break: }
+            \int_incr:N \l_wordcloud_int
+            \msg_info:nnxx { wordcloud } { one-word }
+              { \use_i:nn ##1 } { \use_ii:nn ##1 }
+            \wordcloud_typeset_one_word:Nnn \l_wordcloud_word_box ##1
+            \wordcloud_locate_one_word:Nnn \l_wordcloud_word_box ##1
+            \wordcloud_place_one_word:Nnn \l_wordcloud_word_box ##1
+            \seq_put_right:Nx \l_wordcloud_typeset_words_seq
+              { \use_i:nn ##1 }
+          }
+      }
+    \msg_info:nn { wordcloud } { result-dimensions }
+    \box_set_wd:Nn \l_wordcloud_result_box { 0pt }
+    \box_set_ht:Nn \l_wordcloud_result_box { 0pt }
+    \box_set_dp:Nn \l_wordcloud_result_box { 0pt }
+    \group_begin:
+      \dim_set_eq:NN \fboxsep  \l_wordcloud_surround_fboxsep_dim
+      \dim_set_eq:NN \fboxrule \l_wordcloud_surround_fboxrule_dim
+      \fbox
+        {
+          \vbox:n
+            {
+              \skip_vertical:N \g_wordcloud_ymax_dim
+              \hbox:n
+                {
+                  \skip_horizontal:n { - \g_wordcloud_xmin_dim }
+                  \box_use:N \l_wordcloud_result_box
+                  \skip_horizontal:N \g_wordcloud_xmax_dim
+                }
+              \skip_vertical:n { - \g_wordcloud_ymin_dim }
+            }
+        }
+    \group_end:
+  }
+\box_new:N \l_wordcloud_word_box
+\cs_new_protected:Npn \wordcloud_typeset_one_word:Nnn #1#2#3
+  {
+    \hbox_set:Nn #1
+      {
+        \color_group_begin: \color_ensure_current:
+          \wordcloud_word_style:nn {#2} {#3}
+        \color_group_end:
+      }
+    % make our box depth-less (bug in box_scale) before scaling it
+    \hbox_set:Nn #1
+      { \box_move_up:nn { \box_dp:N #1 } { \box_use_clear:N #1 } }
+    \box_scale:Nnn #1 {#3} {#3}
+    \msg_info:nnxxx { wordcloud } { word-dimensions }
+      {#2} { \box_wd:N #1 } { \box_ht:N #1 + \box_dp:N #1 }
+  }
+\cs_new_protected:Npn \wordcloud_locate_one_word:Nnn #1#2#3
+  {
+    \fp_set:Nn \l_wordcloud_best_radius_fp { inf }
+    \fp_zero:N \l_wordcloud_best_angle_fp
+    \fp_zero:N \l_wordcloud_angle_fp
+    \fp_while_do:nn { \l_wordcloud_angle_fp < 360 }
+      {
+        \wordcloud_one_angle:
+        \fp_add:Nn \l_wordcloud_angle_fp
+          { \l_wordcloud_angle_increment_fp }
+      }
+  }
+\cs_new_protected:Npn \wordcloud_place_one_word:Nnn #1#2#3
+  {
+    \dim_set:Nn \l_wordcloud_x_dim
+      {
+        \fp_to_dim:n
+          { \l_wordcloud_best_radius_fp * cosd (\l_wordcloud_best_angle_fp) }
+      }
+    \dim_set:Nn \l_wordcloud_y_dim
+      {
+        \fp_to_dim:n
+          { \l_wordcloud_best_radius_fp * sind (\l_wordcloud_best_angle_fp) }
+      }
+    \dim_new:c { l_wordcloud_word_#2_xmin_dim }
+    \dim_set:cn { l_wordcloud_word_#2_xmin_dim }
+      { \l_wordcloud_x_dim - .5 \box_wd:N #1 }
+    \dim_new:c { l_wordcloud_word_#2_xmax_dim }
+    \dim_set:cn { l_wordcloud_word_#2_xmax_dim }
+      { \l_wordcloud_x_dim + .5 \box_wd:N #1 }
+    \dim_new:c { l_wordcloud_word_#2_ymin_dim }
+    \dim_set:cn { l_wordcloud_word_#2_ymin_dim }
+      { \l_wordcloud_y_dim - .5 \box_ht:N #1 - .5 \box_dp:N #1 }
+    \dim_new:c { l_wordcloud_word_#2_ymax_dim }
+    \dim_set:cn { l_wordcloud_word_#2_ymax_dim }
+      { \l_wordcloud_y_dim + .5 \box_ht:N #1 + .5 \box_dp:N #1 }
+    \__wordcloud_update_dim:nnn { xmin } { min } {#2}
+    \__wordcloud_update_dim:nnn { xmax } { max } {#2}
+    \__wordcloud_update_dim:nnn { ymin } { min } {#2}
+    \__wordcloud_update_dim:nnn { ymax } { max } {#2}
+    \msg_info:nnn { wordcloud } { word-position } {#2}
+    \box_move_up:nn
+      { \use:c { l_wordcloud_word_#2_ymin_dim } + \box_dp:N #1 }
+      {
+        \hbox_to_wd:nn { 0pt }
+          {
+            \skip_horizontal:c { l_wordcloud_word_#2_xmin_dim }
+            \box_use_clear:N #1
+            \tex_hss:D
+          }
+      }
+  }
+\cs_new_protected:Npn \__wordcloud_update_dim:nnn #1#2#3
+  {
+    \dim_gset:cn { g_wordcloud_#1_dim }
+      {
+        \use:c { dim_#2:nn }
+          { \use:c { g_wordcloud_#1_dim } }
+          { \use:c { l_wordcloud_word_#3_#1_dim } }
+      }
+  }
+\cs_new_protected:Npn \wordcloud_one_angle:
+  {
+    \fp_set:Nn \l_wordcloud_cos_fp { cosd ( \l_wordcloud_angle_fp ) }
+    \fp_set:Nn \l_wordcloud_sin_fp { sind ( \l_wordcloud_angle_fp ) }
+    % Next, we set the radius_fp to the distance between the origin
+    % and the intersection point (between the ray and the rectangles)
+    % furthest from the origin.
+    \fp_zero:N \l_wordcloud_radius_fp
+    \seq_map_inline:Nn \l_wordcloud_typeset_words_seq
+      {
+        \wordcloud_get_radius:ccccN
+          { l_wordcloud_word_##1_xmin_dim }
+          { l_wordcloud_word_##1_xmax_dim }
+          { l_wordcloud_word_##1_ymin_dim }
+          { l_wordcloud_word_##1_ymax_dim }
+          \l_wordcloud_word_box
+      }
+    % We now know that we could place a word at a distance radius_fp
+    % and an angle angle_fp.  If that is closer than what was found so
+    % far, used those values as the best_radius and best_angle.
+    \fp_compare:nT
+      { \l_wordcloud_radius_fp < \l_wordcloud_best_radius_fp }
+      {
+        \fp_set_eq:NN \l_wordcloud_best_radius_fp \l_wordcloud_radius_fp
+        \fp_set_eq:NN \l_wordcloud_best_angle_fp  \l_wordcloud_angle_fp
+      }
+  }
+\cs_new_protected:Npn \wordcloud_get_radius:NNNNN #1#2#3#4#5
+  {
+    \use:x
+      {
+        \wordcloud_get_radius:nnnn
+          { \dim_eval:n { #1 - .5 \box_wd:N #5 } }
+          { \dim_eval:n { #2 + .5 \box_wd:N #5 } }
+          { \dim_eval:n { #3 - .5 \box_ht:N #5 - .5 \box_dp:N #5 } }
+          { \dim_eval:n { #4 + .5 \box_ht:N #5 + .5 \box_dp:N #5 } }
+      }
+  }
+\cs_generate_variant:Nn \wordcloud_get_radius:NNNNN { cccc }
+\cs_new_protected:Npn \wordcloud_get_radius:nnnn #1#2#3#4
+  {
+    % Finds where a half-line starting at the origin with angle
+    % \l_wordcloud_angle_fp intersects the rectangle with
+    % xmin=#1, xmax=#2, ymin=#3, ymax=#4.  For each intersection
+    % that is further than the current radius_fp, increase radius_fp.
+    % The rectangle has four sides, so four calls to the auxiliary.
+    \wordcloud_get_radius_aux:NnNnn
+      \l_wordcloud_cos_fp {#1}
+      \l_wordcloud_sin_fp {#3} {#4}
+    \wordcloud_get_radius_aux:NnNnn
+      \l_wordcloud_cos_fp {#2}
+      \l_wordcloud_sin_fp {#3} {#4}
+    \wordcloud_get_radius_aux:NnNnn
+      \l_wordcloud_sin_fp {#3}
+      \l_wordcloud_cos_fp {#1} {#2}
+    \wordcloud_get_radius_aux:NnNnn
+      \l_wordcloud_sin_fp {#4}
+      \l_wordcloud_cos_fp {#1} {#2}
+  }
+\cs_new_protected:Npn \wordcloud_get_radius_aux:NnNnn #1#2#3#4#5
+  {
+    \fp_compare:nF { #1 = 0 } % omit cases where ray // side.
+      {
+        \fp_set:Nn \l_wordcloud_r_fp { \dim_to_fp:n {#2} / #1 }
+        \dim_compare:nT
+          { #4 <= \fp_to_dim:n { #3 * \l_wordcloud_r_fp } <= #5 }
+          {
+            \fp_set:Nn \l_wordcloud_radius_fp
+              { max( \l_wordcloud_radius_fp , \l_wordcloud_r_fp ) }
+          }
+      }
+  }
+\cs_new_protected:Npn \wordcloud_word_style:nn #1#2 {#1}
+\msg_new:nnn { wordcloud } { listing-words }
+  { Finding,~counting,~and~sorting~the~words }
+\msg_new:nnn { wordcloud } { typesetting-words }
+  { Typesetting~the~words }
+\msg_new:nnn { wordcloud } { one-word }
+  { '#1' ~with~size~#2 }
+\msg_new:nnn { wordcloud } { word-dimensions }
+  { Dimensions~of~the~word~'#1': wd = #2 , ~ ht+dp = #3. }
+\msg_new:nnn { wordcloud } { word-position }
+  {
+    Word~'#1'~at~
+    x = \dim_use:c { l_wordcloud_word_#1_xmin_dim }
+     .. \dim_use:c { l_wordcloud_word_#1_xmax_dim } , ~
+    y = \dim_use:c { l_wordcloud_word_#1_ymin_dim }
+     .. \dim_use:c { l_wordcloud_word_#1_ymax_dim }
+  }
+\msg_new:nnn { wordcloud } { result-dimensions }
+  {
+    Result~box~dimensions:~
+    x = \dim_use:N \g_wordcloud_xmin_dim
+     .. \dim_use:N \g_wordcloud_xmax_dim , ~
+    y = \dim_use:N \g_wordcloud_ymin_dim
+     .. \dim_use:N \g_wordcloud_ymax_dim
+  }
+\ExplSyntaxOff
+
+%\documentclass{article}
+%\usepackage{xcolor} % for \textcolor
+%\usepackage{xparse} % for \DeclareExpandableDocumentCommand
+%\ExplSyntaxOn
+%\DeclareExpandableDocumentCommand { \fpeval } { m } { \fp_eval:n {#1} }
+%\ExplSyntaxOff
+%\begin{document}
+%\pagestyle{empty}
+%\wordcloud
+%  [
+%    number-of-words = 14 ,
+%    style = {\fboxsep=1pt\fboxrule=0pt%
+%      \textcolor[rgb]{\fpeval{1-#2/\wordcloudMaxValue} .5 .5}{#1}} ,
+%    angle-step = 15
+%  ]
+%  {
+%    rcNG launchd SysVinit SystemXVI SMF relaunchd nosh SystemD OpenRC
+%    daemontools upstart monit Epoch finit Runit s6 initng rc minit sinit
+%    ninit perp watchman spark-rc launchd SMF SystemD SystemD OpenRC rcNG rcNG
+%  }
+%\end{document}

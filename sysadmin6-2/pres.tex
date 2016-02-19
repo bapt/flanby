@@ -1,0 +1,100 @@
+\input{../ganditemplate/freebsd.tex}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{tipa}
+\usepackage{svg}
+\definecolor{indigo}{rgb}{0.29, 0.0, 0.51}
+\newcommand{\prestitle}{sysadmin\#6}
+\newcommand{\prev}[1]{\href{https://svnweb.freebsd.org/changeset/ports/#1}{r#1}}
+\lstset{
+	numbers=none,
+	frame=l,
+	aboveskip=0pt, belowskip=0pt
+}
+
+\usepackage{tikz}
+
+\title{Nouveautés FreeBSD 11}
+\author{Baptiste Daroussin \\ \url{bapt@FreeBSD.org} \\ \url{bapt@gandi.net}}
+\institute{\includegraphics[scale=0.13]{../ganditemplate/Gandi_logo_black.eps}\hspace{80pt}\includegraphics[scale=0.5]{../ganditemplate/logo.pdf}}
+\date{sysadmin \#6 \\ Paris \\ 19 Février 2016}
+
+\begin{document}
+\begin{frame}[plain]
+	\titlepage
+\end{frame}
+
+\begin{frame}
+	\frametitle{Sous le capot}
+	\begin{itemize}
+		\item Réécriture complète de sendfile(2): peut envoyer des plusieurs 10aine de Go/s
+		\item Amélioration du support NUMA
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{}
+	\begin{itemize}
+		\item new autofs(5)/automount(8)
+		\item devctl(8) pour manipuler le matériel depuis le userland
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{toolchain}
+	\begin{itemize}
+		\item clang 3.8.0
+		\item lldb activé par défaut sur amd64 and aarch64
+		\item BSD elftoolchain replace binutils (sauf pour ld(1) and objdump(1))
+		\item man(1) utilise mandoc(1) comme renderer par défaut
+		\item Nouvelles archi aarch64 et RiscV
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{}
+	\begin{itemize}
+		\item Ajout du NIC Receive Side Scaling
+		\item Ajout du support UDP-lite
+		\item Suppression du support AppleTalk
+		\item netstat -R montre les informations RSS/flow
+		\item libpcap supporte nativement netmap
+		\item Nouvelle version de netmap
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{}
+	\begin{itemize}
+		\item Support pour Xen dom0
+		\item bhyve:
+			\begin{itemize}
+				\item UEFI support bringing (Windows and Illumos guest)
+				\item Netmap support
+				\item VirtFS (probably)
+			\end{itemize}
+		\item Improved HyperV support
+		\item jails:
+			\begin{itemize}
+				\item support extra ifconfig args in ip4.addr/ip6.addr (allowing CARP)
+				\item top and ps can now filter output by jail
+				\item kern.osrelease and kern.osreldate can now be configured per jail
+				\item lots of vnet(9) fixes
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{New utilities}
+	\begin{itemize}
+		\item fstyp(8)
+		\item devctl(8)
+		\item uefisign(8)
+		\item sesutil(8)
+		\item numactl(8)
+		\item autofs(5)
+		\item casperd(8)
+	\end{itemize}
+\end{frame}
+
+\end{document}

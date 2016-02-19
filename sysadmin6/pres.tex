@@ -1,0 +1,257 @@
+\input{../gandi/freebsd.tex}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{tipa}
+\usepackage{svg}
+\definecolor{indigo}{rgb}{0.29, 0.0, 0.51}
+\newcommand{\prestitle}{sysadmin\#6}
+\newcommand{\prev}[1]{\href{https://svnweb.freebsd.org/changeset/ports/#1}{r#1}}
+\lstset{
+	numbers=none,
+	frame=l,
+	aboveskip=0pt, belowskip=0pt
+}
+
+\usepackage{tikz}
+
+
+\usepackage{wordcloud}
+
+\usepackage{xcolor} % for \textcolor
+\usepackage{xparse} % for \DeclareExpandableDocumentCommand
+\ExplSyntaxOn
+\DeclareExpandableDocumentCommand { \fpeval } { m } { \fp_eval:n {#1} }
+\ExplSyntaxOff
+
+\newcommand{\cloudentry}[2]{
+\renewcommand{\magstep}{#2}
+\larger #1\smaller}
+
+\title{Gestion de services sous Unix}
+\author{Baptiste Daroussin \\ \url{bapt@FreeBSD.org} \\ \url{bapt@gandi.net}}
+\institute{\includegraphics[scale=0.13]{../gandi/Gandi_logo_black.eps}}
+\date{sysadmin \#6 \\ Paris \\ 19 Février 2016}
+
+\begin{document}
+\begin{frame}[plain]
+	\titlepage
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{L'arlésienne}
+	\center
+	\wordcloud[number-of-words = 33,
+		style = {\fboxsep=1pt\fboxrule=0pt%
+		\textcolor[rgb]{\fpeval{1-#2/\wordcloudMaxValue} .5 .5}{#1}} ,
+		angle-step = 15
+	]{
+		rcNG launchd SysVinit SystemXVI SMF relaunchd nosh systemd OpenRC
+		daemontools upstart monit Epoch finit Runit initng rc minit sinit
+		ninit perp watchman sparkrc launchd SMF systemd systemd OpenRC rcNG rcNG
+		supervisor svc circus Shepherd procd DEMONS eINIT
+		OpenRC svc daemontools SMF watchman relaunchd rc eINIT systemd
+	}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Il était une fois init(8)}
+	\begin{itemize}
+		\item petit mais costaud
+			\pause
+		\item I'm your father(c)(tm)
+			\pause
+		\item laisse la main a d'autres pour la gestion des services... \pause presque
+			\pause
+			\begin{itemize}
+				\item /etc/inittab
+				\item /etc/ttys
+			\end{itemize}
+			\pause
+		\item Généralement des scripts shell
+			\begin{itemize}
+				\item SysVinit
+				\item rcNG
+				\item rc
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Alors pourquoi tout ce bordel?}
+	\begin{itemize}
+			\pause
+		\item trop naïf
+			\pause
+		\item framework complexes
+			\pause
+		\item cohérence compliquée
+			\pause
+		\item gestion de ressource complexe
+			\pause
+		\item peu réactif
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Trop naïf}
+	\begin{itemize}
+			\pause
+		\item ne peut superviser qu'un process simple (via son pid)
+			\pause
+		\item perdu si double fork
+			\pause
+		\item interactions limitées
+			\pause
+		\item gestion de dépendance faible
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Framework complexes}
+	\begin{itemize}
+			\pause
+		\item généralement en shell
+			\pause
+		\item complexe à isoler (cf commande service(8))
+			\pause
+		\item complexe à garder une cohérence entre les scripts d'init
+			\pause
+		\item complexe d'intégrer les systèmes de gestion de ressources
+			\pause
+		\item souvent inefficace (performances)
+			\pause
+		\item pas de mécanismes de surveillance de processus
+			\pause
+		\item peu de contrôle sur les processus (double fork)
+			\pause
+		\item fiabilité aléatoire du statut
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Réactivité}
+	\begin{itemize}
+			\pause
+		\item gestion événementielle forcément externe (cron, udev/devd, inetd)
+			\pause
+			\begin{itemize}
+				\item duplication de la gestion des services
+				\item incohérence dans la gestion des services
+			\end{itemize}
+			\pause
+		\item gestion événementielle souvent peu réactive: latence entre l'arrivée de l'évènement et l'action
+			\pause
+		\item fault management absent
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{D'autre soucis: pas simple d'être un bon daemoniste}
+	\begin{itemize}
+			\pause
+		\item utiliser setuid(2), setgid(2) ET setgroup(2) (Vérifier que l'opération c'est réellement effectuée)
+			\pause
+		\item toujours faire un chdir(2) après un chroot(2) (Vérifier leur bon fonctionnement)
+			\pause
+		\item configurer de manière portable les setrlimit(2)
+			\pause
+		\item utiliser les mécanismes OS spécifiques de sandboxing
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Le problème des PIDs}
+	\begin{itemize}
+			\pause
+		\item concept "racy"
+			\pause
+		\item services avec multiple workers hors de contrôle :
+			\begin{itemize}
+				\item les fils qui échappent à la surveillance des parents
+				\item les parents laxistes qui abandonnent leurs enfants
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Ça manque de sucre un peu tout ça}
+	\begin{itemize}
+		\item y a des trous dans ma syslog :(
+		\item c'est pas très parallèle tout ça
+		\item comment je m'assure que ça marche?
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Des solutions possibles?}
+	\begin{itemize}
+		\item Pour les PIDs :
+			\begin{itemize}
+					\pause
+				\item process descriptors (pas suffisant) (Linux 4.1, FreeBSD 10.0)
+					\pause
+				\item les reapers (Linux 3.4, FreeBSD 10.2, Dragonfly 4.0, Solaris 10)
+			\end{itemize}
+			\pause
+		\item Gérer les ressources le sandboxing et la daemonisation via de génération de services
+			\pause
+		\item La réactivité : faire communiquer nativement les différents composants
+			\pause
+		\item La complexité : décrire au maximum les services via des format de description
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Et un peu de sucre en poudre}
+	\begin{itemize}
+			\pause
+		\item Préparer les sockets :
+			\begin{itemize}
+				\item aide à la parallélisation
+				\item simplifie la séparation de privilèges
+				\item aide à la robustesse
+			\end{itemize}
+			\pause
+		\item utiliser un IPC:
+			\begin{itemize}
+				\item limite la duplication de code
+				\item permet la séparation des tâches (KISS)
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Oui mais...}
+	\begin{itemize}
+			\pause
+		\item Faut il remplacer init(8) ? \pause pas nécessairement
+			\pause
+		\item Un des systèmes existant permet il corrige t il tout ça ? \pause NON
+			\pause
+		\item Un des systèmes adresse t il les problèmes majeures ? \pause OUI
+			\pause
+		\item Allez lequel ?\pause
+	\end{itemize}
+	\center
+	\huge SMF \\
+	\pause
+	\normalsize
+	mais over engineer :(
+\end{frame}
+
+\begin{frame}
+	\frametitle{Un peu de lecture}
+	\begin{itemize}
+		\item \href{https://www.usenix.org/legacy/event/lisa05/tech/full_papers/adams/adams.pdf}{Solaris Service Management Facility: Modern System Startup and Administration}
+		\item \href{https://www.usenix.org/legacy/event/usenix01/freenix01/full_papers/mewburn/mewburn_html/}{The Design and Implementation of the NetBSD rc.d system}
+		\item \href{https://svnweb.freebsd.org/base/head/usr.sbin/cron/cron/do_command.c?view=markup}{Les commentaires de Paul Vixie dans do\_command.c}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Questions?}
+	\center
+	\includegraphics[scale=0.25]{dont-feed-trolls.eps}
+\end{frame}
+
+\end{document}
